@@ -13,11 +13,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -57,14 +59,23 @@ fun UserApplication(users: List<User> = userList) {
                 type = NavType.IntType
             })
         ) {
-            UserDetailsScreen(users, it.arguments?.getInt("userId") ?: 0)
+            UserDetailsScreen(
+                users = users,
+                userId = it.arguments?.getInt("userId") ?: 0,
+                navController = navController
+            )
         }
     }
 }
 
 @Composable
 fun UserListScreen(users: List<User>, navController: NavController?) {
-    Scaffold(topBar = { AppBar() }) {
+    Scaffold(topBar = {
+        AppBar(
+            title = "Home",
+            icon = Icons.Default.Home
+        ) {}
+    }) {
         Surface(modifier = Modifier.fillMaxSize()) {
             LazyColumn {
                 items(users) {
@@ -78,9 +89,16 @@ fun UserListScreen(users: List<User>, navController: NavController?) {
 }
 
 @Composable
-fun UserDetailsScreen(users: List<User>, userId: Int) {
+fun UserDetailsScreen(users: List<User>, userId: Int, navController: NavController?) {
     val user = users.first { it.id == userId }
-    Scaffold(topBar = { AppBar() }) {
+    Scaffold(topBar = {
+        AppBar(
+            title = user.name,
+            icon = Icons.Default.ArrowBack
+        ) {
+            navController?.navigateUp()
+        }
+    }) {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -95,16 +113,18 @@ fun UserDetailsScreen(users: List<User>, userId: Int) {
 }
 
 @Composable
-fun AppBar() {
+fun AppBar(title: String, icon: ImageVector, iconClick: () -> Unit) {
     TopAppBar(
         navigationIcon = {
             Icon(
-                Icons.Default.ArrowBack,
+                imageVector = icon,
                 "Content description",
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier
+                    .clickable { iconClick.invoke() }
+                    .padding(horizontal = 12.dp)
             )
         },
-        title = { Text(text = "Home") })
+        title = { Text(text = title) })
 }
 
 @Composable
@@ -176,7 +196,7 @@ fun ProfileContent(name: String, isOnline: Boolean, alignment: Alignment.Horizon
 @Composable
 fun UserDetailsPreview() {
     ProfileCardTheme {
-        UserDetailsScreen(userList, 0)
+        UserDetailsScreen(userList, 0, null)
     }
 }
 
