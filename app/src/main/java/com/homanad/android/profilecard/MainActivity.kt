@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
@@ -30,14 +31,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ProfileCardTheme {
-                MainScreen()
+                UserListScreen()
             }
         }
     }
 }
 
 @Composable
-fun MainScreen(users: List<User> = userList) {
+fun UserListScreen(users: List<User> = userList) {
     Scaffold(topBar = { AppBar() }) {
         Surface(modifier = Modifier.fillMaxSize()) {
             LazyColumn {
@@ -77,14 +78,14 @@ fun ProfileCard(user: User) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            ProfilePicture(user.pictureUrl, user.status)
-            ProfileContent(user.name, user.status)
+            ProfilePicture(user.pictureUrl, user.status, 72.dp)
+            ProfileContent(user.name, user.status, Alignment.Start)
         }
     }
 }
 
 @Composable
-fun ProfilePicture(pictureUrl: String, isOnline: Boolean) {
+fun ProfilePicture(pictureUrl: String, isOnline: Boolean, imageSize: Dp) {
     Card(
         shape = CircleShape,
         border = BorderStroke(
@@ -99,7 +100,7 @@ fun ProfilePicture(pictureUrl: String, isOnline: Boolean) {
                 data = pictureUrl,
                 builder = { CircleCropTransformation() }
             ),
-            modifier = Modifier.size(72.dp),
+            modifier = Modifier.size(imageSize),
             contentDescription = "Profile picture description",
             contentScale = ContentScale.Crop
         )
@@ -107,11 +108,11 @@ fun ProfilePicture(pictureUrl: String, isOnline: Boolean) {
 }
 
 @Composable
-fun ProfileContent(name: String, isOnline: Boolean) {
+fun ProfileContent(name: String, isOnline: Boolean, alignment: Alignment.Horizontal) {
     Column(
         modifier = Modifier
-            .padding(5.dp)
-            .fillMaxWidth()
+            .padding(5.dp),
+        horizontalAlignment = alignment
     ) {
         CompositionLocalProvider(LocalContentAlpha provides if (isOnline) 1f else ContentAlpha.medium) {
             Text(text = name, style = MaterialTheme.typography.h5)
@@ -126,10 +127,34 @@ fun ProfileContent(name: String, isOnline: Boolean) {
     }
 }
 
+@Composable
+fun UserDetailsScreen(user: User = userList[0]) {
+    Scaffold(topBar = { AppBar() }) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                ProfilePicture(user.pictureUrl, user.status, 240.dp)
+                ProfileContent(user.name, user.status, Alignment.CenterHorizontally)
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
+fun UserDetailsPreview() {
     ProfileCardTheme {
-        MainScreen()
+        UserDetailsScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserListPreview() {
+    ProfileCardTheme {
+        UserListScreen()
     }
 }
